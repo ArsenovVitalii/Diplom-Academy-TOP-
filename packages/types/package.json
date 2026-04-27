@@ -1,0 +1,13 @@
+{
+  "name": "@top-it-school/types",
+  "version": "1.0.0",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./user": "./src/user.ts",
+    "./course": "./src/course.ts",
+    "./order": "./src/order.ts",
+    "./api": "./src/api.ts"
+  }
+}
