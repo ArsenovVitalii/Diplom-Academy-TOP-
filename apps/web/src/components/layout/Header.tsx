@@ -138,8 +138,8 @@ export const Header: React.FC = () => {
     backgroundColor: 'var(--color-background)',
     borderBottom: '1px solid var(--color-border)',
     flexDirection: 'column',
-    padding: '16px 20px',
-    gap: '16px',
+    padding: '20px',
+    gap: '24px',
     boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
     opacity: isMenuOpen ? 1 : 0,
     visibility: isMenuOpen ? 'visible' : 'hidden',
@@ -211,16 +211,16 @@ export const Header: React.FC = () => {
       
       {/* Мобильное меню */}
       <div style={mobileMenuStyles} ref={menuRef}>
-        <Link to="/courses" style={{ fontWeight: 500 }} onClick={closeMenu}>
+        <Link to="/courses" style={{ fontWeight: 500 }} onClick={closeMenu} className="mobile-menu-link">
           Каталог
         </Link>
         {user ? (
           <>
-            <Link to="/cart" style={cartLinkStyles} onClick={closeMenu}>
+            <Link to="/cart" style={cartLinkStyles} onClick={closeMenu} className="mobile-menu-link">
               Корзина
               {items.length > 0 && <span style={badgeStyles}>{items.length}</span>}
             </Link>
-            <Link to="/profile" style={profileLinkStyles} onClick={closeMenu}>
+            <Link to="/profile" style={profileLinkStyles} onClick={closeMenu} className="mobile-menu-link">
               <img 
                 src="/photos/ava.svg" 
                 alt="Профиль" 
@@ -234,7 +234,7 @@ export const Header: React.FC = () => {
             </Link>
           </>
         ) : (
-          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
             <Link to="/login" onClick={closeMenu}>
               <Button variant="outline" size="small">Войти</Button>
             </Link>
@@ -255,6 +255,11 @@ export const Header: React.FC = () => {
         @media (max-width: 768px) {
           .desktop-nav { display: none !important; }
           .burger-button { display: flex !important; }
+        }
+        @media (max-width: 480px) {
+          .mobile-menu-link {
+            padding: 12px 0 !important;
+          }
         }
       `}</style>
     </header>

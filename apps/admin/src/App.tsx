@@ -4,6 +4,7 @@ import { LoginPage } from './pages/LoginPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { CoursesPage } from './pages/CoursesPage';
 import { UsersPage } from './pages/UsersPage';
+import { OrdersPage } from './pages/OrdersPage';
 import { HeroSettingsPage } from './pages/HeroSettingsPage';
 
 const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -20,8 +21,10 @@ const App: React.FC = () => {
         <Route path="/dashboard" element={<PrivateRoute><DashboardPage /></PrivateRoute>} />
         <Route path="/courses" element={<PrivateRoute><CoursesPage /></PrivateRoute>} />
         <Route path="/users" element={<PrivateRoute><UsersPage /></PrivateRoute>} />
+        <Route path="/orders" element={<PrivateRoute><OrdersPage /></PrivateRoute>} />
         <Route path="/hero-settings" element={<PrivateRoute><HeroSettingsPage /></PrivateRoute>} />
-        <Route path="*" element={<Navigate to="/dashboard" />} />
+        <Route path="/" element={<Navigate to="/login" />} />
+        <Route path="*" element={<Navigate to="/login" />} />
       </Routes>
     </BrowserRouter>
   );

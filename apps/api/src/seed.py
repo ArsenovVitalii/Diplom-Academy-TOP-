@@ -38,29 +38,28 @@ def seed_courses():
     """Seed courses if they don't exist."""
     db = SessionLocal()
     try:
-        # Check if courses already exist
-        existing = db.query(Course).first()
-        if existing:
-            print("Courses already seeded.")
+        # Получаем все существующие ID курсов из старой базы
+        existing_ids = {
+            "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"
+        }
+        
+        # Получаем все курсы из БД
+        existing_courses = db.query(Course).filter(Course.id.in_(existing_ids)).all()
+        existing_course_ids = {c.id for c in existing_courses}
+        
+        # Проверяем, нужно ли добавлять курсы
+        if len(existing_course_ids) == len(existing_ids):
+            print(f"Все {len(existing_ids)} курсов уже существуют.")
             return
         
         courses_data = [
             {
-                "id": "1",
-                "title": "Программирование на Python",
-                "description": "Python + ИИ: сайты и машинное обучение",
-                "price": 15000,
-                "duration": "12 месяцев",
-                "age_badge": "16+",
-                "image_url": ""
-            },
-            {
                 "id": "2",
                 "title": "Веб-разработчик с нуля",
                 "description": "От фронта до бэка с использованием ИИ",
-                "price": 15000,
+                "price": 16000,
                 "duration": "12 месяцев",
-                "age_badge": "16+",
+                "age_badge": "18+",
                 "image_url": ""
             },
             {
@@ -146,15 +145,22 @@ def seed_courses():
             },
         ]
         
+        added_count = 0
         for course_data in courses_data:
-            course = Course(**course_data)
-            db.add(course)
+            if course_data["id"] not in existing_course_ids:
+                course = Course(**course_data)
+                db.add(course)
+                added_count += 1
+                print(f"  Добавлен курс: {course_data['title']}")
         
-        db.commit()
-        print(f"Seeded {len(courses_data)} courses.")
+        if added_count > 0:
+            db.commit()
+            print(f"✅ Добавлено курсов: {added_count}")
+        else:
+            print("Все курсы уже существуют.")
         
     except Exception as e:
-        print(f"Error seeding courses: {e}")
+        print(f"❌ Error seeding courses: {e}")
         db.rollback()
     finally:
         db.close()

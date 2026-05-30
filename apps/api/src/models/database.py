@@ -1,7 +1,8 @@
-from sqlalchemy import Column, String, Integer, Float, DateTime, ForeignKey, Enum
+from sqlalchemy import Column, String, Integer, Float, DateTime, ForeignKey, Enum, Boolean
 from sqlalchemy.orm import relationship
 from datetime import datetime
 import enum
+import random
 from ..core.database import Base
 
 
@@ -24,6 +25,11 @@ class User(Base):
     password_hash = Column(String, nullable=False)
     role = Column(Enum(UserRole), default=UserRole.CUSTOMER, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+    # Email verification fields
+    is_verified = Column(Boolean, default=False, nullable=False)
+    verification_code = Column(String(6), nullable=True)
+    code_expires_at = Column(DateTime, nullable=True)
 
     cart_items = relationship("CartItem", back_populates="user", cascade="all, delete-orphan")
     orders = relationship("Order", back_populates="user", cascade="all, delete-orphan")
@@ -81,7 +87,7 @@ class OrderItem(Base):
     order_id = Column(String, ForeignKey("orders.id"), nullable=False)
     course_id = Column(String, ForeignKey("courses.id"), nullable=False)
     price_at_purchase = Column(Float, nullable=False)
-    added_at = Column(DateTime, default=datetime.utcnow)  # ← ДОБАВЛЕНО ПОЛЕ
+    added_at = Column(DateTime, default=datetime.utcnow)
 
     order = relationship("Order", back_populates="items")
     course = relationship("Course", back_populates="order_items")
@@ -101,13 +107,31 @@ class HeroSettings(Base):
 class UserProfile(Base):
     __tablename__ = "user_profiles"
 
-    id = Column(String, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     user_id = Column(String, ForeignKey("users.id"), unique=True, nullable=False)
     name = Column(String, default="", nullable=False)
     phone = Column(String, default="", nullable=False)
+    avatar_url = Column(String, default="")
 
     user = relationship("User", back_populates="profile", uselist=False)
 
 
-# Add relationship to User model
 User.profile = relationship("UserProfile", back_populates="user", uselist=False)
+
+
+class Review(Base):
+    __tablename__ = "reviews"
+
+    id = Column(String, primary_key=True, index=True)
+    course_id = Column(String, ForeignKey("courses.id"), nullable=False)
+    user_id = Column(String, ForeignKey("users.id"), nullable=False)
+    rating = Column(Integer, nullable=False)
+    text = Column(String, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    course = relationship("Course", back_populates="reviews")
+    user = relationship("User", back_populates="reviews")
+
+
+Course.reviews = relationship("Review", back_populates="course", cascade="all, delete-orphan")
+User.reviews = relationship("Review", back_populates="user", cascade="all, delete-orphan")

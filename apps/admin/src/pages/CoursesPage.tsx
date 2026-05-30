@@ -38,17 +38,41 @@ export const CoursesPage: React.FC = () => {
       const data = await api.courses.getAll();
       console.log('Loaded courses:', data);
       setCourses(data);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
+      alert('Ошибка загрузки курсов: ' + (err?.message || 'Неизвестная ошибка'));
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Валидация формы
+    if (!formData.title.trim()) {
+      alert('Введите название курса');
+      return;
+    }
+    if (formData.title.length < 3) {
+      alert('Название курса должно быть не менее 3 символов');
+      return;
+    }
+    if (!formData.description.trim()) {
+      alert('Введите описание курса');
+      return;
+    }
+    if (formData.description.length < 10) {
+      alert('Описание курса должно быть не менее 10 символов');
+      return;
+    }
+    if (!formData.price || parseFloat(formData.price) <= 0) {
+      alert('Укажите корректную цену (больше 0)');
+      return;
+    }
+
     try {
       const courseData = {
-        title: formData.title,
-        description: formData.description,
+        title: formData.title.trim(),
+        description: formData.description.trim(),
         price: parseFloat(formData.price),
         duration: formData.duration,
         age_badge: formData.age_badge,
@@ -68,9 +92,10 @@ export const CoursesPage: React.FC = () => {
       setEditingCourse(null);
       loadCourses();
       alert('Курс сохранён!');
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error saving course:', err);
-      alert('Ошибка при сохранении курса');
+      const errorMessage = err?.message || err?.data?.detail || 'Ошибка при сохранении курса';
+      alert('Ошибка при сохранении курса: ' + errorMessage);
     }
   };
 
@@ -98,8 +123,10 @@ export const CoursesPage: React.FC = () => {
     try {
       await api.courses.delete(id);
       loadCourses();
-    } catch (err) {
+      alert('Курс удалён');
+    } catch (err: any) {
       console.error(err);
+      alert(err?.message || 'Ошибка при удалении курса');
     }
   };
 

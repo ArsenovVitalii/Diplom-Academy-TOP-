@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost:8000/api';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 
 const getToken = () => localStorage.getItem('adminToken');
 
@@ -43,6 +43,14 @@ export const api = {
   users: {
     getAll: () => request<any[]>('/users'),
     delete: (id: string) => request<any>(`/users/${id}`, { method: 'DELETE' }),
+  },
+  orders: {
+    getAll: () => request<any[]>('/orders'),
+    updateStatus: (orderId: string, status: string) =>
+      request<any>(`/orders/${orderId}/status`, {
+        method: 'PATCH', 
+        body: JSON.stringify({ status }),
+      }),
   },
   settings: {
     getHero: () => request<any>('/settings/hero'),

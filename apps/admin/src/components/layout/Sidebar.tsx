@@ -72,6 +72,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ active }) => {
         <Link to="/dashboard" style={linkStyles(active === 'dashboard')}>📊 Дашборд</Link>
         <Link to="/courses" style={linkStyles(active === 'courses')}>📚 Курсы</Link>
         <Link to="/users" style={linkStyles(active === 'users')}>👥 Пользователи</Link>
+        <Link to="/orders" style={linkStyles(active === 'orders')}>📦 Заказы</Link>
         <Link to="/hero-settings" style={linkStyles(active === 'hero-settings')}>🎨 Хиро-панель</Link>
         <button onClick={openWebsite} style={buttonStyles}>
           🌐 На сайт

@@ -4,6 +4,8 @@ export interface Course {
   description: string;
   price: number;
   imageUrl: string;
+  duration: string;
+  ageBadge: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -13,6 +15,8 @@ export interface CreateCourseInput {
   description: string;
   price: number;
   imageUrl?: string;
+  duration?: string;
+  ageBadge?: string;
 }
 
 export interface UpdateCourseInput {
@@ -20,4 +24,6 @@ export interface UpdateCourseInput {
   description?: string;
   price?: number;
   imageUrl?: string;
+  duration?: string;
+  ageBadge?: string;
 }

@@ -17,9 +17,10 @@ interface CourseCardProps {
   course: Course;
   showAddToCart?: boolean;
   onAddToCart?: (e?: React.MouseEvent) => void;
+  isInCart?: boolean;
 }
 
-export const CourseCard: React.FC<CourseCardProps> = ({ course, onAddToCart }) => {
+export const CourseCard: React.FC<CourseCardProps> = ({ course, onAddToCart, isInCart = false }) => {
   const styles: React.CSSProperties = {
     padding: '0',
     overflow: 'hidden',
@@ -133,8 +134,12 @@ export const CourseCard: React.FC<CourseCardProps> = ({ course, onAddToCart }) =
           <span style={priceStyles}>{course.price.toLocaleString()} ₽</span>
           <div style={{ display: 'flex', gap: '8px' }}>
             {onAddToCart && (
-              <Button size="small" onClick={() => onAddToCart()}>
-                В корзину
+              <Button 
+                size="small" 
+                onClick={() => onAddToCart()}
+                variant={isInCart ? 'outline' : 'primary'}
+              >
+                {isInCart ? '✓ В корзине' : 'В корзину'}
               </Button>
             )}
             <Link to={`/course/${course.id}`}>

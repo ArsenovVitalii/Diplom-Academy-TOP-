@@ -1,15 +1,31 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Layout } from '../components/layout/Layout';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
+import { api } from '../api/client';
 
 export const CartPage: React.FC = () => {
   const { items, removeItem, total } = useCart();
   const { token } = useAuth();
   const navigate = useNavigate();
+
+  const [recommendations, setRecommendations] = useState<any[]>([]);
+  const [recommendationsLoading, setRecommendationsLoading] = useState(false);
+
+  // Загрузка рекомендаций
+  useEffect(() => {
+    if (token && items.length > 0) {
+      setRecommendationsLoading(true);
+      const courseIds = items.map(item => item.course_id);
+      api.courses.getRecommendations(courseIds, 3)
+        .then(setRecommendations)
+        .catch(() => setRecommendations([]))
+        .finally(() => setRecommendationsLoading(false));
+    }
+  }, [token, items]);
 
   if (!token) {
     return (
@@ -69,6 +85,26 @@ export const CartPage: React.FC = () => {
     padding: '60px',
   };
 
+  const recommendationsStyles: React.CSSProperties = {
+    marginTop: '40px',
+    padding: '24px',
+    border: '1px solid var(--color-border)',
+    borderRadius: '8px',
+  };
+
+  const recommendationsGridStyles: React.CSSProperties = {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+    gap: '16px',
+    marginTop: '20px',
+  };
+
+  const recommendationCardStyles: React.CSSProperties = {
+    padding: '16px',
+    backgroundColor: '#f8f9fa',
+    borderRadius: '8px',
+  };
+
   return (
     <Layout>
       <div className="container" style={styles}>
@@ -119,6 +155,44 @@ export const CartPage: React.FC = () => {
                 </Button>
               </div>
             </Card>
+            
+            {/* Рекомендации */}
+            {recommendationsLoading && (
+              <div style={recommendationsStyles}>
+                <p style={{ textAlign: 'center', color: '#666' }}>Загрузка рекомендаций...</p>
+              </div>
+            )}
+            
+            {!recommendationsLoading && recommendations.length > 0 && (
+              <div style={recommendationsStyles}>
+                <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '10px' }}>
+                  Вам также может понравиться
+                </h3>
+                <p style={{ fontSize: '14px', color: '#666', marginBottom: '20px' }}>
+                  Похожие курсы, которые могут вас заинтересовать
+                </p>
+                <div style={recommendationsGridStyles}>
+                  {recommendations.map((course) => (
+                    <div key={course.id} style={recommendationCardStyles}>
+                      <h4 style={{ margin: '0 0 8px 0', fontSize: '14px', fontWeight: 600 }}>
+                        {course.title}
+                      </h4>
+                      <p style={{ margin: '0 0 12px 0', fontSize: '12px', color: '#666', lineHeight: 1.4 }}>
+                        {course.description.substring(0, 80)}...
+                      </p>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ color: 'var(--color-accent)', fontWeight: 700, fontSize: '14px' }}>
+                          {course.price.toLocaleString()} ₽
+                        </span>
+                        <Link to={`/course/${course.id}`}>
+                          <Button size="small" variant="outline">Подробнее</Button>
+                        </Link>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

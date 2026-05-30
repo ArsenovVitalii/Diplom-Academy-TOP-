@@ -30,3 +30,21 @@ export interface AuthResponse {
   token: string;
   user: UserResponse;
 }
+
+// Review types
+export interface Review {
+  id: string;
+  courseId: string;
+  userId: string;
+  rating: number;
+  text: string;
+  createdAt: Date;
+  userName?: string;
+  userAvatarUrl?: string;
+}
+
+export interface CreateReviewInput {
+  courseId: string;
+  rating: number;
+  text: string;
+}

@@ -1,0 +1,84 @@
+erDiagram
+    users {
+        String id PK
+        String email UK, NN
+        String password_hash NN
+        Enum role NN ADMIN/CUSTOMER
+        DateTime created_at
+        Boolean is_verified NN
+        String verification_code
+        DateTime code_expires_at
+    }
+
+    user_profiles {
+        Integer id PK, AI
+        String user_id FK, UK, NN
+        String name NN
+        String phone NN
+        String avatar_url
+    }
+
+    courses {
+        String id PK
+        String title NN
+        String description NN
+        Integer price NN
+        String image_url
+        String duration
+        String age_badge
+        DateTime created_at
+        DateTime updated_at
+    }
+
+    cart_items {
+        String id PK
+        String user_id FK, NN
+        String course_id FK, NN
+        DateTime added_at
+    }
+
+    orders {
+        String id PK
+        String user_id FK, NN
+        Float total_amount NN
+        Enum status NN pending/paid/cancelled
+        String customer_name NN
+        String phone NN
+        String address
+        DateTime created_at
+    }
+
+    order_items {
+        String id PK
+        String order_id FK, NN
+        String course_id FK, NN
+        Float price_at_purchase NN
+        DateTime added_at
+    }
+
+    hero_settings {
+        Integer id PK, AI
+        String slogan NN
+        String subtitle NN
+        String cta_text NN
+        String image_url NN
+        DateTime updated_at
+    }
+
+    reviews {
+        String id PK
+        String course_id FK, NN
+        String user_id FK, NN
+        Integer rating NN
+        String text NN
+        DateTime created_at
+    }
+
+    users ||--|| user_profiles : "1:1"
+    users ||--o{ cart_items : "1:N"
+    users ||--o{ orders : "1:N"
+    users ||--o{ reviews : "1:N"
+    courses ||--o{ cart_items : "1:N"
+    courses ||--o{ order_items : "1:N"
+    courses ||--o{ reviews : "1:N"
+    orders ||--o{ order_items : "1:N"

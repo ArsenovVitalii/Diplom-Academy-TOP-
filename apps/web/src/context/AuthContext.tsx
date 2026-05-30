@@ -13,6 +13,8 @@ interface AuthContextType {
   token: string | null;
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string) => Promise<void>;
+  verifyEmail: (email: string, code: string) => Promise<void>;
+  resendVerificationCode: (email: string) => Promise<void>;
   logout: () => void;
   isLoading: boolean;
 }
@@ -56,6 +58,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setUser(response.user);
   };
 
+  const verifyEmail = async (email: string, code: string) => {
+    await api.auth.verify(email, code);
+  };
+
+  const resendVerificationCode = async (email: string) => {
+    await api.auth.resendCode(email);
+  };
+
   const logout = () => {
     localStorage.removeItem('token');
     setToken(null);
@@ -63,7 +73,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, register, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, token, login, register, verifyEmail, resendVerificationCode, logout, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

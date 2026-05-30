@@ -1,22 +1,13 @@
 from pydantic import BaseModel
-from datetime import datetime
 from typing import List, Optional
-from .course import CourseResponse
 
-
-class CartItemResponse(BaseModel):
+class OrderItemResponse(BaseModel):
     id: str
+    order_id: Optional[str] = None
     course_id: str
-    added_at: datetime
-    course: CourseResponse
-
-    class Config:
-        from_attributes = True
-
-
-class CartItemCreate(BaseModel):
-    course_id: str
-
+    price_at_purchase: float
+    added_at: Optional[str] = None
+    course: Optional[dict] = None
 
 class OrderResponse(BaseModel):
     id: str
@@ -26,14 +17,13 @@ class OrderResponse(BaseModel):
     customer_name: str
     phone: str
     address: Optional[str] = None
-    created_at: datetime
-    items: List[CartItemResponse]
-
-    class Config:
-        from_attributes = True
-
+    created_at: Optional[str] = None
+    items: List[OrderItemResponse] = []
 
 class OrderCreate(BaseModel):
     customer_name: str
     phone: str
     address: Optional[str] = None
+
+# Для совместимости с cart.py
+CartItemResponse = OrderItemResponse

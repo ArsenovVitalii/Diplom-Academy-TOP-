@@ -15,6 +15,7 @@ export const CheckoutPage: React.FC = () => {
   const [processing, setProcessing] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const [orderCreated, setOrderCreated] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -24,10 +25,10 @@ export const CheckoutPage: React.FC = () => {
   useEffect(() => {
     if (!token) {
       navigate('/login');
-    } else if (items.length === 0) {
+    } else if (items.length === 0 && !orderCreated) {
       navigate('/cart');
     }
-  }, [token, items.length, navigate]);
+  }, [token, items.length, navigate, orderCreated]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -52,6 +53,7 @@ export const CheckoutPage: React.FC = () => {
           customer_name: formData.name,
           phone: formData.phone,
         });
+        setOrderCreated(true);
         setPaymentSuccess(true);
         await clearCart();
         

@@ -41,88 +41,227 @@ top-it-school/
 - 👥 **Управление пользователями** — просмотр и удаление пользователей
 - ⚙️ **Настройки главной страницы** — слоган, подзаголовок, текст кнопки
 
-## 🚀 Быстрый старт
+## 🚀 Установка и запуск (пошаговая инструкция)
 
-### Требования
+Этот проект требует настройки нескольких компонентов. Следуйте шагам по порядку.
 
-- Node.js 18+
-- Python 3.10+
-- PostgreSQL 14+
+### ⚙️ Требования
 
-### Установка
+Перед установкой убедитесь, что на компьютере установлены:
 
-1. **Клонируйте репозиторий и установите npm зависимости:**
+- **Node.js 18+** — [Скачать](https://nodejs.org/)
+- **Python 3.10+** — [Скачать](https://www.python.org/downloads/)
+- **PostgreSQL 14+** — [Скачать](https://www.postgresql.org/download/)
 
-```bash
+> **Проверка установок:**
+> ```powershell
+> node --version
+> python --version
+> psql --version
+> ```
+
+---
+
+### Шаг 1: Клонирование репозитория
+
+```powershell
+git clone <repository-url>
 cd top-it-school
+```
+
+---
+
+### Шаг 2: Установка Node.js зависимостей
+
+```powershell
 npm install
 ```
 
-2. **Установите Python зависимости для API:**
+Это установит зависимости для всех приложений монорепозитория (web, admin, packages).
 
-```bash
+---
+
+### Шаг 3: Настройка Python виртуального окружения
+
+```powershell
 cd apps/api
+python -m venv venv
+.\venv\Scripts\Activate.ps1
 pip install -r requirements.txt
+cd ../..
 ```
 
-3. **Настройте базу данных PostgreSQL:**
+> **Если PowerShell блокирует выполнение скриптов:**
+> ```powershell
+> Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+> ```
 
+---
+
+### Шаг 4: Настройка переменных окружения
+
+Создайте `.env` файлы из примеров:
+
+**Для API:**
+```powershell
+cd apps/api
+copy .env.example .env
+```
+
+Откройте `apps/api/.env` и при необходимости измените значения:
+
+```env
+# Database (PostgreSQL)
+DATABASE_URL=postgresql://username:password@localhost:5432/top_it_school
+
+# Security
+SECRET_KEY=your-super-secret-key-change-in-production
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=10080
+
+# CORS
+CORS_ORIGINS=http://localhost:3000,http://localhost:3001,http://localhost:5173
+
+# Admin credentials
+ADMIN_EMAIL=admin@top-academy.ru
+ADMIN_PASSWORD=admin123
+```
+
+**Для фронтенда (web и admin):**
+```powershell
+cd apps/web
+copy .env.example .env
+cd ../admin
+copy .env.example .env
+```
+
+Файлы `.env` для web и admin содержат только:
+```env
+VITE_API_BASE_URL=http://localhost:8000/api
+```
+
+---
+
+### Шаг 5: Настройка базы данных PostgreSQL
+
+**Вариант А — Использование SQLite (проще, для разработки):**
+
+Измените в `apps/api/.env`:
+```env
+DATABASE_URL=sqlite:///./top_it_school.db
+```
+
+**Вариант Б — PostgreSQL (рекомендуется):**
+
+1. Создайте базу данных:
 ```sql
 CREATE DATABASE top_it_school;
 ```
 
-4. **Запустите seed для создания начальных данных:**
-
-```bash
-cd apps/api
-python run_seed.py
+2. Обновите `DATABASE_URL` в `apps/api/.env`:
+```env
+DATABASE_URL=postgresql://username:password@localhost:5432/top_it_school
 ```
 
-5. **Создайте админ-пользователя:**
+---
 
-```bash
-cd apps/api
-python create_admin.py
-```
+### Шаг 6: Запуск проекта
 
-### Запуск
-
-1. **Бэкенд (в одной вкладке терминала):**
+#### 6.1. Запуск бэкенда (PowerShell)
 
 ```powershell
-cd C:\Users\Боярин\Desktop\Diplom\apps\api
+cd apps/api
 .\venv\Scripts\Activate.ps1
-uvicorn src.main:app --reload --port 8000
+uvicorn src.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-API будет доступно на: http://localhost:8000
-Документация API: http://localhost:8000/docs
+> При первом запуске автоматически создаются:
+> - Админ-пользователь (admin@top-academy.ru / admin123)
+> - Начальные данные курсов
+> - Настройки главной страницы
 
-2. **Клиентский сайт (в другой вкладке):**
+**API доступно на:**
+- Основная страница: http://localhost:8000
+- Документация Swagger: http://localhost:8000/docs
+- Проверка работы: http://localhost:8000/health
 
-```
+---
+
+#### 6.2. Запуск клиентского сайта (новая вкладка терминала)
+
+Откройте **новый терминал**, вернитесь в корень проекта:
+
+```powershell
+cd top-it-school
 npm run dev
 ```
 
-Сайт будет доступен на: http://localhost:3000
+**Запустится сразу два приложения:**
+- **Клиентский сайт:** http://localhost:3000
+- **Админ-панель:** http://localhost:3001
 
-3. **Админ-панель (в третьей вкладке):**
+---
 
-```bash
-cd apps/admin
-npm run dev
+### 📋 Сводная таблица портов
+
+| Приложение | Порт | URL |
+|------------|------|-----|
+| API (FastAPI) | 8000 | http://localhost:8000 |
+| Клиентский сайт (Web) | 3000 | http://localhost:3000 |
+| Админ-панель (Admin) | 3001 | http://localhost:3001 |
+
+---
+
+### 🔐 Учётные данные по умолчанию
+
+| Система | Email/Логин | Пароль |
+|---------|-------------|--------|
+| **Админ-панель** | admin@top-academy.ru | admin123 |
+| **API документация** | admin@top-academy.ru | admin123 |
+
+> Пароль можно изменить в `apps/api/.env` перед первым запуском:
+> ```env
+> ADMIN_EMAIL=ваш@email.com
+> ADMIN_PASSWORD=ваш_пароль
+> ```
+
+---
+
+### 🔄 Пересоздание админ-пользователя
+
+Если нужно сбросить учётные данные админа:
+
+```powershell
+cd apps/api
+.\venv\Scripts\Activate.ps1
+python create_correct_admin.py
 ```
-
-Админка будет доступна на: http://localhost:3001
 
 ## 🔐 Учётные данные
 
 ### Админ-панель
 
+По умолчанию:
+
 | Поле | Значение |
 |------|----------|
 | Email | `admin@example.com` |
 | Пароль | `admin123` |
+
+**Чтобы изменить логин и пароль админа:**
+
+1. Откройте `apps/api/.env`
+2. Измените значения:
+   ```
+   ADMIN_EMAIL=ваш@email.com
+   ADMIN_PASSWORD=ваш_пароль
+   ```
+3. Пересоздайте админа:
+   ```bash
+   cd apps/api
+   .\venv\Scripts\Activate.ps1
+   python create_admin.py
+   ```
 
 ### База данных
 
@@ -270,15 +409,16 @@ npm run dev
 
 ### Монорепозиторий
 
-```bash
-npm install          # Установить все зависимости
-npm run build        # Собрать все приложения
-npm run dev          # Запустить все приложения
+```powershell
+npm install          # Установить все зависимости для web и admin
+npm run dev          # Запустить web (порт 3000) и admin (порт 3001)
+npm run build        # Собрать все приложения для продакшена
+npm run lint         # Запустить линтинг
 ```
 
 ### Клиентский сайт
 
-```bash
+```powershell
 cd apps/web
 npm run dev          # Dev сервер
 npm run build        # Сборка для продакшена
@@ -287,7 +427,7 @@ npm run preview      # Превью продакшен сборки
 
 ### Админ-панель
 
-```bash
+```powershell
 cd apps/admin
 npm run dev          # Dev сервер
 npm run build        # Сборка для продакшена
@@ -296,48 +436,108 @@ npm run build        # Сборка для продакшена
 ### API
 
 ```powershell
-cd C:\Users\Боярин\Desktop\Diplom\apps\api
+# Активация виртуального окружения
+cd apps/api
 .\venv\Scripts\Activate.ps1
-uvicorn src.main:app --reload --port 8000  # Запуск с hot-reload
-python run_seed.py    # Заполнение БД начальными данными
-python create_admin.py # Создание админ-пользователя
+
+# Запуск сервера
+uvicorn src.main:app --reload --host 0.0.0.0 --port 8000
+
+# Утилиты
+python create_admin.py      # Создать/обновить админа из .env
+python create_correct_admin.py # Пересоздать админа (admin@top-academy.ru / admin123)
+python run_seed.py          # Заполнить БД курсами и настройками
 ```
+
+> **Важно:** Перед первым запуском убедитесь, что файл `.env` создан в `apps/api/` (скопируйте из `.env.example`).
 
 ## 🔧 Возможные проблемы
 
 ### Ошибка подключения к базе данных
 
-Убедитесь, что PostgreSQL запущен и настроен правильно. Проверьте строку подключения в `apps/api/src/core/config.py`.
+**Для SQLite:** Убедитесь, что в `apps/api/.env` указано:
+```env
+DATABASE_URL=sqlite:///./top_it_school.db
+```
+
+**Для PostgreSQL:** Убедитесь, что:
+1. PostgreSQL запущен
+2. База данных `top_it_school` создана
+3. Логин и пароль в `DATABASE_URL` верные
 
 ### CORS ошибки
 
-Если фронтенд не может обратиться к API, проверьте настройки CORS в `apps/api/src/main.py`.
-
-### Не отображаются курсы
-
-Запустите seed для заполнения базы данных:
-```bash
-cd apps/api
-python run_seed.py
+Если фронтенд не может обратиться к API, проверьте `CORS_ORIGINS` в `apps/api/.env`:
+```env
+CORS_ORIGINS=http://localhost:3000,http://localhost:3001,http://localhost:5173
 ```
 
-### Не работает вход в админ-панель
+### Не создаётся админ-пользователь
 
-Создайте админ-пользователя:
-```bash
+1. Убедитесь, что `.env` файл существует в `apps/api/`
+2. Проверьте значения `ADMIN_EMAIL` и `ADMIN_PASSWORD`
+3. Пересоздайте админа:
+```powershell
 cd apps/api
-python create_admin.py
+.\venv\Scripts\Activate.ps1
+python create_correct_admin.py
 ```
 
-### Изображения курсов не отображаются
+### Ошибка активации виртуального окружения в PowerShell
 
-1. Проверьте, что URL изображения корректный
-2. Убедитесь, что изображение доступно по публичной ссылке
-3. Обновите страницу (Ctrl+F5) после добавления изображения
+Если видите ошибку о выполнении скриптов:
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+```
 
-## 📄 Лицензия
+Затем повторите активацию:
+```powershell
+.\venv\Scripts\Activate.ps1
+```
 
-Учебный проект.
+### Ошибки при `npm install`
+
+Очистите кэш npm и переустановите:
+```powershell
+npm cache clean --force
+rm -r node_modules
+npm install
+```
+
+### Порт занят
+
+Если порт 8000, 3000 или 3001 занят:
+- Измените порт в `apps/api/.env` (переменная `PORT`)
+- Или остановите процесс, использующий порт:
+```powershell
+# Найти процесс на порту
+netstat -ano | findstr :8000
+# Завершить процесс (замените PID на свой)
+taskkill /PID <PID> /F
+```
+
+## 🔐 Безопасность
+
+### Переменные окружения
+
+**Никогда не коммитьте `.env` файлы в репозиторий!** Они содержат секретные ключи и настройки.
+
+Для запуска проекта:
+1. Скопируйте `.env.example` в `.env` в каждой папке (`apps/api`, `apps/web`, `apps/admin`)
+2. Измените значения по необходимости
+3. Особенно важно изменить `SECRET_KEY` в продакшене
+
+### Генерация SECRET_KEY
+
+Для продакшена сгенерируйте безопасный ключ:
+
+```python
+# В Python
+import secrets
+print(secrets.token_urlsafe(32))
+```
+
+Или используйте онлайн-генератор.
 
 ---
 

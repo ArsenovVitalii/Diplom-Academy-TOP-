@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
+import random
 from ..core.database import get_db
 from ..core.security import get_current_admin, get_current_user
-from ..models.database import Course, User
+from ..models.database import Course, User, CartItem, OrderItem, Review
 from ..schemas.course import CourseCreate, CourseUpdate, CourseResponse
 
 router = APIRouter(prefix="/courses", tags=["courses"])
@@ -13,6 +14,26 @@ router = APIRouter(prefix="/courses", tags=["courses"])
 def get_courses(db: Session = Depends(get_db)):
     courses = db.query(Course).all()
     return courses
+
+
+@router.get("/random/recommendations", response_model=List[CourseResponse])
+def get_random_recommendations(
+    limit: int = 3,
+    exclude_ids: List[str] = [],
+    db: Session = Depends(get_db)
+):
+    """Get random courses for recommendations, optionally excluding specified course IDs"""
+    query = db.query(Course)
+    if exclude_ids:
+        query = query.filter(~Course.id.in_(exclude_ids))
+    
+    all_courses = query.all()
+    
+    if len(all_courses) <= limit:
+        return all_courses
+    
+    selected = random.sample(all_courses, limit)
+    return selected
 
 
 @router.get("/{course_id}", response_model=CourseResponse)
@@ -92,6 +113,10 @@ def delete_course(
             detail="Course not found"
         )
     
+    db.query(CartItem).filter(CartItem.course_id == course_id).delete()
+    db.query(OrderItem).filter(OrderItem.course_id == course_id).delete()
+    db.query(Review).filter(Review.course_id == course_id).delete()
+
     db.delete(course)
     db.commit()
     return {"message": "Course deleted"}

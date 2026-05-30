@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost:8000/api';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 
 const getToken = () => localStorage.getItem('token');
 
@@ -13,14 +13,36 @@ const request = async <T>(
     ...options.headers,
   };
 
-  const response = await fetch(`${API_BASE}${endpoint}`, {
-    ...options,
-    headers,
-  });
+  const url = `${API_BASE}${endpoint}`;
+  console.log('API Request:', { url, method: options.method, body: options.body });
+
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      ...options,
+      headers,
+    });
+  } catch (networkError) {
+    console.error('Network Error:', networkError);
+    throw new Error('Network error: ' + (networkError as Error).message);
+  }
 
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ detail: 'Request failed' }));
-    throw new Error(error.detail || 'Request failed');
+    let errorData: any;
+    try {
+      errorData = await response.json();
+    } catch {
+      errorData = { detail: 'Request failed' };
+    }
+
+    console.error('API Error:', { status: response.status, data: errorData });
+    
+    // Передаём детальное сообщение об ошибке
+    const errorMessage = errorData.detail || `HTTP ${response.status}: Request failed`;
+    const error = new Error(errorMessage);
+    (error as any).status = response.status;
+    (error as any).data = errorData;
+    throw error;
   }
 
   return response.json();
@@ -39,6 +61,16 @@ export const api = {
         method: 'POST',
         body: JSON.stringify({ email, password }),
       }),
+    verify: (email: string, code: string) =>
+      request<{ detail: string; verified: boolean }>('/auth/verify', {
+        method: 'POST',
+        body: JSON.stringify({ email, verification_code: code }),
+      }),
+    resendCode: (email: string) =>
+      request<{ detail: string }>('/auth/resend-code', {
+        method: 'POST',
+        body: JSON.stringify({ email }),
+      }),
     me: () => request<any>('/auth/me'),
   },
   courses: {
@@ -47,6 +79,11 @@ export const api = {
     create: (data: any) => request<any>('/courses', { method: 'POST', body: JSON.stringify(data) }),
     update: (id: string, data: any) => request<any>(`/courses/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
     delete: (id: string) => request<any>(`/courses/${id}`, { method: 'DELETE' }),
+    getReviews: (courseId: string) => request<any[]>(`/reviews/course/${courseId}`),
+    createReview: (courseId: string, data: { rating: number; text: string }) =>
+      request<any>('/reviews', { method: 'POST', body: JSON.stringify({ course_id: courseId, ...data }) }),
+    getRecommendations: (excludeIds: string[], limit: number = 3) =>
+      request<any[]>(`/courses/random/recommendations?limit=${limit}&exclude_ids=${excludeIds.join(',')}`),
   },
   cart: {
     get: () => request<any[]>('/cart'),
@@ -59,11 +96,21 @@ export const api = {
     getById: (id: string) => request<any>(`/orders/${id}`),
     create: (data: { customer_name: string; phone: string }) => 
       request<any>('/orders', { method: 'POST', body: JSON.stringify(data) }),
-  },
+    updateStatus: (orderId: string, status: string) =>
+      request<any>(`/orders/${orderId}/status`, { 
+        method: 'PATCH', 
+        body: JSON.stringify({ status }) 
+      }),
+},
   users: {
     getAll: () => request<any[]>('/users'),
     getById: (id: string) => request<any>(`/users/${id}`),
     delete: (id: string) => request<any>(`/users/${id}`, { method: 'DELETE' }),
+    getProfile: () => request<any>('/public/my-profile'),
+    updateProfile: (data: { name?: string; phone?: string; avatar_url?: string }) =>
+      request<any>('/users/profile', { method: 'PUT', body: JSON.stringify(data) }),
+    uploadAvatar: (avatarUrl: string) =>
+      request<any>('/users/profile/avatar', { method: 'PATCH', body: JSON.stringify({ avatar_url: avatarUrl }) }),
   },
   settings: {
     getHero: () => request<any>('/settings/hero'),
